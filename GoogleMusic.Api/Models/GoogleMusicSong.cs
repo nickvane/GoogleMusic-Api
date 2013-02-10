@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace GoogleMusic.Api.Models
 {
@@ -96,7 +97,11 @@ namespace GoogleMusic.Api.Models
         {
             get
             {
-                return (albumart != null && !albumart.StartsWith("http:")) ? "http:" + albumart : albumart;
+                if (string.IsNullOrEmpty(albumart)) return string.Empty;
+                // change the size by adjusting the last part of the url
+                // https://lh3.googleusercontent.com/kC0Rjq90XqeCsh3jpHww5rJ6WJEKsp2fRgJk0zMkOu88CTUMEY-yHOmHfX4pFpui24RXLe4qTosZYaQ=s128-c-e100
+                var artUrl = Regex.Replace(albumart, @"[=][s]\d+[-][c][-][e]\d+", "=s500-c-e100", RegexOptions.IgnoreCase);
+                return (!artUrl.StartsWith("http:")) ? "http:" + artUrl : artUrl;
             }
             set { albumart = value; }
         }

@@ -34,17 +34,25 @@ namespace GoogleMusic.Api
                              };
 
             var form = new FormBuilder(fields, true);
-            var tokenContent = await _client.UploadDataAsync(new Uri("https://www.google.com/accounts/ClientLogin"), form);
+            string tokenContent;
+            try
+            {
+                tokenContent = await _client.UploadDataAsync(new Uri("https://www.google.com/accounts/ClientLogin"), form);
+            }
+            catch
+            {
+                return false;
+            } 
 
             var tokens = tokenContent.Split('\n');
             foreach (var token in tokens)
             {
-                if (token.StartsWith("SID=")) _client.SetSidToken(token.Replace("SID=", ""));
-                if (token.StartsWith("LSID=")) _client.SetLsidToken(token.Replace("LSID=", ""));
-                if (token.StartsWith("Auth=")) _client.SetAuthorizationToken(token.Replace("Auth=", ""));
+                if (token.StartsWith("SID=")) _client.Sid = token.Replace("SID=", "");
+                if (token.StartsWith("LSID=")) _client.Lsid = token.Replace("LSID=", "");
+                if (token.StartsWith("Auth=")) _client.Auth = token.Replace("Auth=", "");
             }
 
-            var content = await _client.UploadDataAsync(new Uri(BaseUrl + "listen?hl=en&u=0"), FormBuilder.Empty, true);
+            var content = await _client.UploadDataAsync(new Uri(BaseUrl + "listen?hl=en&u=0"), FormBuilder.Empty);
             return !string.IsNullOrEmpty(content);
         }
 
